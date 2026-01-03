@@ -9,26 +9,63 @@
 </head>
 <body>
     <div class="container">
+        <!-- Service Status Header -->
+        <div class="service-status" id="serviceStatus" style="display: none;">
+            <div class="status-indicator">
+                <span class="status-dot" id="serviceStatusDot"></span>
+                <span id="serviceStatusText">Checking service...</span>
+            </div>
+            <div class="environment-badge" id="environmentBadge">-</div>
+        </div>
+
         <div class="header">
             <h1>🍁 MapleAI API Monitor</h1>
             <p>Real-time API usage statistics and analytics</p>
         </div>
 
         <div class="token-input-section">
+            <!-- Enhanced token input with visibility toggle -->
             <div class="token-input">
-                <input type="password" id="apiToken" placeholder="Enter your Bearer token..." />
+                <div style="flex: 1; position: relative; min-width: 300px;">
+                    <input type="password" id="apiToken" placeholder="Enter your Bearer token..." />
+                    <button type="button" class="token-toggle" id="tokenToggle" onclick="toggleTokenVisibility()">
+                        👁️
+                    </button>
+                </div>
                 <button class="btn btn-primary" onclick="loadData()">
                     <span id="loadBtnText">Load Data</span>
                     <div class="loading-spinner" id="loadSpinner" style="display: none;"></div>
                 </button>
                 <button class="btn btn-secondary" onclick="clearToken()">Clear</button>
             </div>
+            
+            <!-- API Key Storage Security Notice -->
+            <div class="security-notice" id="securityNotice">
+                🔒 <strong>Security Notice:</strong> Your API key is stored locally in your browser using localStorage. 
+                <a href="#" onclick="showSecurityDetails(); return false;">Learn more</a>
+            </div>
+            
+            <div class="security-details" id="securityDetails" style="display: none;">
+                <p><strong>⚠️ Security Information:</strong></p>
+                <ul>
+                    <li>API keys are stored in your browser's localStorage</li>
+                    <li>Data persists between sessions but is not encrypted</li>
+                    <li>Clear your token using the "Clear" button when done</li>
+                    <li>For production use, consider implementing a backend proxy</li>
+                </ul>
+                <p><a href="#" onclick="hideSecurityDetails(); return false;">Hide details</a></p>
+            </div>
+            
             <div class="error-message" id="errorMessage"></div>
         </div>
 
         <div class="dashboard" id="dashboard">
+            <!-- Global Service Stats -->
+            <div class="global-stats" id="globalStats"></div>
+
             <div class="user-info" id="userInfo"></div>
 
+            <!-- Enhanced stats grid with global metrics -->
             <div class="stats-grid">
                 <div class="stat-card" id="rpmCard">
                     <div class="stat-header">
@@ -62,7 +99,7 @@
 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <div class="stat-title">Total API Usage</div>
+                        <div class="stat-title">Your Total Usage</div>
                         <span class="stat-icon">🔢</span>
                     </div>
                     <div class="stat-value" id="totalUsage">-</div>
@@ -71,17 +108,42 @@
 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <div class="stat-title">Total Tokens Used</div>
+                        <div class="stat-title">Your Tokens Used</div>
                         <span class="stat-icon">🪙</span>
                     </div>
                     <div class="stat-value" id="totalTokens">-</div>
                     <div class="stat-subtitle">tokens processed</div>
                 </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Global API Requests</div>
+                        <span class="stat-icon">🌍</span>
+                    </div>
+                    <div class="stat-value" id="globalRequests">-</div>
+                    <div class="stat-subtitle">service-wide total</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Global Tokens Used</div>
+                        <span class="stat-icon">🌐</span>
+                    </div>
+                    <div class="stat-value" id="globalTokens">-</div>
+                    <div class="stat-subtitle">service-wide total</div>
+                </div>
+            </div>
+
+            <!-- Available Endpoints Section -->
+            <div class="endpoints-section">
+                <h3>📡 Available API Endpoints</h3>
+                <div class="endpoints-list" id="endpointsList"></div>
+                <div class="endpoint-count" id="endpointCount"></div>
             </div>
 
             <div class="chart-container">
                 <div class="chart-header">
-                    <div class="chart-title">📈 Usage History (Last 7 Days)</div>
+                    <div class="chart-title">📈 Your Usage History (Last 7 Days)</div>
                     <div class="chart-controls">
                         <div class="status-indicator">
                             <span class="status-dot active" id="statusDot"></span>
