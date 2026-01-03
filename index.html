@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapleAI API Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍁 MapleAI API Monitor</h1>
+            <p>Real-time API usage statistics and analytics</p>
+        </div>
+
+        <div class="token-input-section">
+            <div class="token-input">
+                <input type="password" id="apiToken" placeholder="Enter your Bearer token..." />
+                <button class="btn btn-primary" onclick="loadData()">
+                    <span id="loadBtnText">Load Data</span>
+                    <div class="loading-spinner" id="loadSpinner" style="display: none;"></div>
+                </button>
+                <button class="btn btn-secondary" onclick="clearToken()">Clear</button>
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="user-info" id="userInfo"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card" id="rpmCard">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-title">Requests per Minute</div>
+                            <div class="usage-badge" id="rpmBadge">Checking...</div>
+                        </div>
+                        <div class="stat-icon">⚡</div>
+                    </div>
+                    <div class="stat-value" id="rpmValue">-</div>
+                    <div class="progress-bar" id="rpmProgress" style="display: none;">
+                        <div class="progress-fill" id="rpmFill"></div>
+                        <div class="progress-text" id="rpmText"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card" id="rpdCard">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-title">Requests per Day</div>
+                            <div class="usage-badge" id="rpdBadge">Checking...</div>
+                        </div>
+                        <div class="stat-icon">📊</div>
+                    </div>
+                    <div class="stat-value" id="rpdValue">-</div>
+                    <div class="progress-bar" id="rpdProgress" style="display: none;">
+                        <div class="progress-fill" id="rpdFill"></div>
+                        <div class="progress-text" id="rpdText"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Total API Usage</div>
+                        <span class="stat-icon">🔢</span>
+                    </div>
+                    <div class="stat-value" id="totalUsage">-</div>
+                    <div class="stat-subtitle">requests all time</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Total Tokens Used</div>
+                        <span class="stat-icon">🪙</span>
+                    </div>
+                    <div class="stat-value" id="totalTokens">-</div>
+                    <div class="stat-subtitle">tokens processed</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">📈 Usage History (Last 7 Days)</div>
+                    <div class="chart-controls">
+                        <div class="status-indicator">
+                            <span class="status-dot active" id="statusDot"></span>
+                            <span id="statusText">Live</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+
+            <div class="last-update" id="lastUpdate">
+                Last updated: Never
+            </div>
+        </div>
+
+        <button class="btn btn-primary refresh-btn" id="refreshBtn" onclick="refreshData()" style="display: none;">
+            🔄
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
