@@ -1,15 +1,92 @@
 let chart = null;
 let autoRefreshInterval = null;
 let currentToken = null;
+let serviceStatusInterval = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Load saved token if it exists
     const savedToken = localStorage.getItem('mapleai_token');
     if (savedToken) {
         document.getElementById('apiToken').value = savedToken;
         loadData();
     }
+    
+    // Check service status on load
+    checkServiceStatus();
+    
+    // Periodically check service status
+    serviceStatusInterval = setInterval(() => checkServiceStatus(), 60000); // Check every 60 seconds
 });
+
+// Check service status (no token required)
+async function checkServiceStatus() {
+    const statusDot = document.getElementById('serviceStatusDot');
+    const statusText = document.getElementById('serviceStatusText');
+    const envBadge = document.getElementById('environmentBadge');
+    const serviceStatusDiv = document.getElementById('serviceStatus');
+    
+    try {
+        const response = await fetch('https://api.mapleai.de/', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Service unavailable');
+        }
+        
+        const data = await response.json();
+        
+        // Show service status
+        serviceStatusDiv.style.display = 'flex';
+        statusDot.className = 'status-dot active';
+        statusText.textContent = `Service ${data.status} - ${data.requests.toLocaleString()} requests served`;
+        envBadge.textContent = data.environment;
+        
+        // Store global stats for dashboard
+        window.globalServiceData = data;
+        
+        // Update dashboard if it's visible
+        if (document.getElementById('dashboard').style.display !== 'none') {
+            updateGlobalStats();
+        }
+        
+    } catch (error) {
+        serviceStatusDiv.style.display = 'flex';
+        statusDot.className = 'status-dot error';
+        statusText.textContent = 'Service unreachable';
+        envBadge.textContent = 'offline';
+        envBadge.style.background = 'rgba(248, 113, 113, 0.15)';
+        envBadge.style.borderColor = 'rgba(248, 113, 113, 0.3)';
+        envBadge.style.color = '#fecaca';
+        
+        console.error('Service status check failed:', error);
+    }
+}
+
+// Toggle token visibility
+function toggleTokenVisibility() {
+    const tokenInput = document.getElementById('apiToken');
+    const toggleBtn = document.getElementById('tokenToggle');
+    
+    if (tokenInput.type === 'password') {
+        tokenInput.type = 'text';
+        toggleBtn.textContent = '🙈';
+    } else {
+        tokenInput.type = 'password';
+        toggleBtn.textContent = '👁️';
+    }
+}
+
+// Show/hide security details
+function showSecurityDetails() {
+    document.getElementById('securityDetails').style.display = 'block';
+}
+
+function hideSecurityDetails() {
+    document.getElementById('securityDetails').style.display = 'none';
+}
 
 // Load data with token
 async function loadData() {
@@ -43,6 +120,9 @@ function clearToken() {
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
         autoRefreshInterval = null;
+    }
+    if (window.globalServiceData) {
+        delete window.globalServiceData;
     }
 }
 
@@ -135,6 +215,11 @@ function updateDashboard(keyData, usageData) {
     document.getElementById('userInfo').innerHTML = userInfoHtml;
     document.getElementById('userInfo').className = `user-info ${keyData.admin ? 'admin' : ''} fade-in`;
 
+    // Update Global Stats if available
+    if (window.globalServiceData) {
+        updateGlobalStats();
+    }
+
     // Update RPM
     updateRateCard('rpm', keyData.rpm, keyData.rpm_used, 'RPM');
     
@@ -150,6 +235,48 @@ function updateDashboard(keyData, usageData) {
 
     // Update last update time
     document.getElementById('lastUpdate').textContent = `Last updated: ${new Date().toLocaleString()}`;
+}
+
+// Update global service stats
+function updateGlobalStats() {
+    const data = window.globalServiceData;
+    if (!data) return;
+
+    const globalStatsHtml = `
+        <h3>🌍 Global Service Statistics</h3>
+        <div class="global-stats-content">
+            <div class="global-stat-item">
+                <div class="global-stat-value">${data.requests.toLocaleString()}</div>
+                <div class="global-stat-label">Total Requests</div>
+            </div>
+            <div class="global-stat-item">
+                <div class="global-stat-value">${parseInt(data.total_tokens_used).toLocaleString()}</div>
+                <div class="global-stat-label">Total Tokens Used</div>
+            </div>
+            <div class="global-stat-item">
+                <div class="global-stat-value">${data.endpoints.length}</div>
+                <div class="global-stat-label">Available Endpoints</div>
+            </div>
+        </div>
+    `;
+    
+    const globalStatsDiv = document.getElementById('globalStats');
+    globalStatsDiv.innerHTML = globalStatsHtml;
+    globalStatsDiv.style.display = 'block';
+
+    // Update global stats in the stats grid too
+    document.getElementById('globalRequests').textContent = data.requests.toLocaleString();
+    document.getElementById('globalTokens').textContent = parseInt(data.total_tokens_used).toLocaleString();
+
+    // Update endpoints list
+    const endpointsList = document.getElementById('endpointsList');
+    const endpointCount = document.getElementById('endpointCount');
+    
+    endpointsList.innerHTML = data.endpoints.map(endpoint => 
+        `<div class="endpoint-item">${endpoint}</div>`
+    ).join('');
+    
+    endpointCount.textContent = `${data.endpoints.length} endpoints available`;
 }
 
 // Update rate card (RPM/RPD)
@@ -334,6 +461,11 @@ function updateChart(usageData) {
 function showDashboard() {
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('refreshBtn').style.display = 'flex';
+    
+    // Also update global stats if we have them
+    if (window.globalServiceData) {
+        updateGlobalStats();
+    }
 }
 
 // Show error
@@ -364,5 +496,8 @@ document.getElementById('apiToken').addEventListener('keypress', (e) => {
 window.addEventListener('beforeunload', () => {
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
+    }
+    if (serviceStatusInterval) {
+        clearInterval(serviceStatusInterval);
     }
 });
