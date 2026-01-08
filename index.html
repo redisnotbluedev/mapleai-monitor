@@ -24,7 +24,6 @@
         </div>
 
         <div class="token-input-section">
-            <!-- Enhanced token input with visibility toggle -->
             <div class="token-input">
                 <div style="flex: 1; position: relative; min-width: 300px;">
                     <input type="password" id="apiToken" placeholder="Enter your Bearer token..." />
@@ -39,9 +38,9 @@
                 <button class="btn btn-secondary" onclick="clearToken()">Clear</button>
             </div>
             
-            <!-- API Key Storage Security Notice -->
+            <!-- Security Notice -->
             <div class="security-notice" id="securityNotice">
-                🔒 <strong>Security Notice:</strong> Your API key is stored locally in your browser using localStorage. 
+                🔒 <strong>Security:</strong> API key stored locally (not encrypted). 
                 <a href="#" onclick="showSecurityDetails(); return false;">Learn more</a>
             </div>
             
@@ -61,7 +60,7 @@
 
         <div class="dashboard" id="dashboard">
             <!-- Global Service Stats -->
-            <div class="global-stats" id="globalStats"></div>
+            <div class="global-stats" id="globalStats" style="display: none;"></div>
 
             <div class="user-info" id="userInfo"></div>
 
@@ -135,7 +134,7 @@
             </div>
 
             <!-- Available Endpoints Section -->
-            <div class="endpoints-section">
+            <div class="endpoints-section" id="endpointsSection" style="display: none;">
                 <h3>📡 Available API Endpoints</h3>
                 <div class="endpoints-list" id="endpointsList"></div>
                 <div class="endpoint-count" id="endpointCount"></div>
