@@ -1,9 +1,11 @@
+// Global variables
 let chart = null;
 let autoRefreshInterval = null;
 let currentToken = null;
 let serviceStatusInterval = null;
+let globalServiceData = null;
 
-// Initialize
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Load saved token if it exists
     const savedToken = localStorage.getItem('mapleai_token');
@@ -45,7 +47,7 @@ async function checkServiceStatus() {
         envBadge.textContent = data.environment;
         
         // Store global stats for dashboard
-        window.globalServiceData = data;
+        globalServiceData = data;
         
         // Update dashboard if it's visible
         if (document.getElementById('dashboard').style.display !== 'none') {
@@ -121,9 +123,7 @@ function clearToken() {
         clearInterval(autoRefreshInterval);
         autoRefreshInterval = null;
     }
-    if (window.globalServiceData) {
-        delete window.globalServiceData;
-    }
+    globalServiceData = null;
 }
 
 // Fetch data from API
@@ -216,7 +216,7 @@ function updateDashboard(keyData, usageData) {
     document.getElementById('userInfo').className = `user-info ${keyData.admin ? 'admin' : ''} fade-in`;
 
     // Update Global Stats if available
-    if (window.globalServiceData) {
+    if (globalServiceData) {
         updateGlobalStats();
     }
 
@@ -239,7 +239,7 @@ function updateDashboard(keyData, usageData) {
 
 // Update global service stats
 function updateGlobalStats() {
-    const data = window.globalServiceData;
+    const data = globalServiceData;
     if (!data) return;
 
     const globalStatsHtml = `
@@ -277,6 +277,9 @@ function updateGlobalStats() {
     ).join('');
     
     endpointCount.textContent = `${data.endpoints.length} endpoints available`;
+    
+    // Show endpoints section
+    document.getElementById('endpointsSection').style.display = 'block';
 }
 
 // Update rate card (RPM/RPD)
@@ -463,7 +466,7 @@ function showDashboard() {
     document.getElementById('refreshBtn').style.display = 'flex';
     
     // Also update global stats if we have them
-    if (window.globalServiceData) {
+    if (globalServiceData) {
         updateGlobalStats();
     }
 }
